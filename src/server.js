@@ -28,6 +28,17 @@ io.on('connection', (socket) => {
         
         socket.join(roomName);        
         callback(roomName);
+        socket.to(roomName).emit('welcome');
+    });
+
+    socket.on('disconnecting', () => {
+        socket.rooms.forEach(room => socket.to(room).emit('bye'));
+    });
+
+    socket.on('message', (roomName, message, callback) => {
+        
+        socket.to(roomName).emit('message', message);
+        callback();
     });
 });
   
