@@ -26,11 +26,27 @@ const handleConnection = (socket) => {
     console.log(socket);
 }
 
-// const handleListening = (data) => {
-//     console.log(data);
-// }
-wss.on('connection', handleConnection);
+const sockets = [];
 
-// wss.on('listening', handleListening);
+wss.on('connection', (socket) => {
+
+    sockets.push(socket);    
+    socket['nickname'] = 'Anonymous';
+
+    console.log('Connected to Browser');
+    socket.on("close", () => console.log('Disconnected from the Browser'));
+
+    socket.on("message", (data) => {
+
+        const message = JSON.parse(data.toString('utf8'));                
+
+        switch (message.type) {
+            case "message":
+                sockets.forEach(aSocket => aSocket.send(JSON.stringify(`${socket.nickname}: ${message.payload}`)));
+            case "nickname":
+                socket['nickname'] = message.payload;
+        }
+    });    
+});
 
 server.listen(3000, handleListen);
