@@ -39,3 +39,27 @@
 // });
 
 const socket = io();
+
+const welcome     = document.querySelector('#welcome');
+const roomForm    = welcome.querySelector('form');
+const room        = document.querySelector('#room');
+const messageForm = room.querySelector('form');
+
+room.hidden = true;
+
+const enterRoom = (_roomName) => {
+    welcome.hidden = true;
+    room.hidden    = false;
+
+    const roomName = room.querySelector('h3');
+    roomName.innerText = `Room: ${_roomName}`;
+}
+
+roomForm.addEventListener('submit', (e) => {
+
+    e.preventDefault();
+
+    const input = roomForm.querySelector('input');
+    socket.emit('enter_room', input.value, enterRoom)
+    input.value = '';
+});

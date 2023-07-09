@@ -24,7 +24,11 @@ const server = http.createServer(app);
 const io     = new Server(server);
 
 io.on('connection', (socket) => {
-    console.log(socket);
+    socket.on('enter_room', (roomName, callback) => {
+        
+        socket.join(roomName);        
+        callback(roomName);
+    });
 });
   
 //   server.listen(3000, () => {
