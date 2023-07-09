@@ -9,11 +9,13 @@ html(lang="en")
         header
             h1 Noom
         main 
-            form#nick                     
-                input(type="text", placeholder="write a nickname", required)
-                button Save
-            form#message 
-                ul
-                input(type="text", placeholder="write a message", required)
-                button Send
+            //- form#nick                     
+            //-     input(type="text", placeholder="write a nickname", required)
+            //-     button Save
+            //- form#message 
+            //-     ul
+            //-     input(type="text", placeholder="write a message", required)
+            //-     button Send
+            
+        script(src='/socket.io/socket.io.js')
         script(src='/public/js/app.js')
