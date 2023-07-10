@@ -23,7 +23,27 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`);
 const server = http.createServer(app);
 const io     = new Server(server);
 
+ 
+const getPublicRooms = () => {
+    // const {
+    //     sockets: {
+    //         adapter : {rooms, sids}
+    //     }
+    // } = io;
+
+    const { rooms, sids } = io.sockets.adapter;
+    
+    const publicRoom = [];
+    rooms.forEach((_, key) => {
+        
+        if (sids.get(key) === undefined) publicRoom.push(key);
+    })
+    
+    return publicRoom;
+}
+
 io.on('connection', (socket) => {
+        
     socket['nickname'] = 'Anonymous';
 
     socket.on('enter_room', (roomName, nickname, callback) => {
@@ -31,11 +51,16 @@ io.on('connection', (socket) => {
         socket.join(roomName);
         socket['nickname'] = nickname;
         callback();
-        socket.to(roomName).emit('welcome', nickname);        
+        socket.to(roomName).emit('welcome', nickname); 
+        io.sockets.emit('room_change', getPublicRooms());                
     });
 
     socket.on('disconnecting', () => {
         socket.rooms.forEach(room => socket.to(room).emit('bye', socket['nickname']));
+    });
+
+    socket.on('disconnect', () => {
+        io.sockets.emit('room_change', getPublicRooms());
     });
 
     socket.on('message', (roomName, message, callback) => {

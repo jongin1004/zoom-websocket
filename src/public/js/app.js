@@ -42,17 +42,18 @@ const socket = io();
 
 const welcome     = document.querySelector('#welcome');
 const roomForm    = welcome.querySelector('form');
+const chat        = document.querySelector('#chat');
+const messageForm = chat.querySelector('form');
 const room        = document.querySelector('#room');
-const messageForm = room.querySelector('form');
 
-room.hidden = true;
+chat.hidden = true;
 let roomName;
 
 const enterRoom = () => {
     welcome.hidden = true;
-    room.hidden    = false;
+    chat.hidden    = false;
 
-    const roomTitle     = room.querySelector('h3');
+    const roomTitle     = chat.querySelector('h3');
     roomTitle.innerText = `Room: ${roomName}`;
 
     messageForm.addEventListener('submit', (e) => {
@@ -82,7 +83,7 @@ roomForm.addEventListener('submit', (e) => {
 
 const insertMessage = (message) => {
     const HTML = `<li>${message}</li>`;
-    room.querySelector('ul').insertAdjacentHTML('beforeend', HTML);
+    chat.querySelector('ul').insertAdjacentHTML('beforeend', HTML);
 }
 
 socket.on('welcome', (nickname) => {
@@ -96,3 +97,15 @@ socket.on('bye', (nickname) => {
 socket.on('message', (message) => {
     insertMessage(message);
 });
+
+socket.on('room_change', (rooms) => {
+    
+    const roomList = room.querySelector('ul');
+    roomList.innerHTML = '';    
+
+    if (rooms.length < 1) return;
+
+    const HTML = rooms.map(room => `<li>${room}</li>`);
+    roomList.innerHTML = HTML;
+});
+
