@@ -72,11 +72,12 @@ roomForm.addEventListener('submit', (e) => {
 
     e.preventDefault();
 
-    const input = roomForm.querySelector('input');
-    socket.emit('enter_room', input.value, enterRoom);
+    const roomNameInput = roomForm.querySelector('input[name="roomName"]');
+    const nicknameInput = roomForm.querySelector('input[name="nickname"]');
+    socket.emit('enter_room', roomNameInput.value, nicknameInput.value, enterRoom);
 
-    roomName    = input.value;    
-    input.value = '';
+    roomName    = roomNameInput.value;
+    // roomNameInput.value = '';
 });
 
 const insertMessage = (message) => {
@@ -84,12 +85,12 @@ const insertMessage = (message) => {
     room.querySelector('ul').insertAdjacentHTML('beforeend', HTML);
 }
 
-socket.on('welcome', () => {
-    insertMessage('someone joined');
+socket.on('welcome', (nickname) => {
+    insertMessage(`${nickname}님이 채팅방에 참가했습니다.`);
 });
 
-socket.on('bye', () => {
-    insertMessage('someone left');
+socket.on('bye', (nickname) => {
+    insertMessage(`${nickname}님이 채팅방을 떠났습니다.`);
 });
 
 socket.on('message', (message) => {

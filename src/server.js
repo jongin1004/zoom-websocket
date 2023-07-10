@@ -24,20 +24,23 @@ const server = http.createServer(app);
 const io     = new Server(server);
 
 io.on('connection', (socket) => {
-    socket.on('enter_room', (roomName, callback) => {
+    socket['nickname'] = 'Anonymous';
+
+    socket.on('enter_room', (roomName, nickname, callback) => {
         
-        socket.join(roomName);        
-        callback(roomName);
-        socket.to(roomName).emit('welcome');
+        socket.join(roomName);
+        socket['nickname'] = nickname;
+        callback();
+        socket.to(roomName).emit('welcome', nickname);        
     });
 
     socket.on('disconnecting', () => {
-        socket.rooms.forEach(room => socket.to(room).emit('bye'));
+        socket.rooms.forEach(room => socket.to(room).emit('bye', socket['nickname']));
     });
 
     socket.on('message', (roomName, message, callback) => {
         
-        socket.to(roomName).emit('message', message);
+        socket.to(roomName).emit('message', `${socket['nickname']}: ${message}`);
         callback();
     });
 });
