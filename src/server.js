@@ -4,6 +4,7 @@ import {Server} from 'socket.io';
 import http from 'http';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { instrument } from "@socket.io/admin-ui";
 import { createPublicKey } from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,9 +22,17 @@ app.get('/*', (req, res) => res.redirect('/'));
 const handleListen = () => console.log(`Listening on http://localhost:3000`);
 
 const server = http.createServer(app);
-const io     = new Server(server);
+const io     = new Server(server, {
+    cors: {
+        origin: ['https://admin.socket.io'],
+        credentials: true,
+    },
+});
 
- 
+instrument(io, {
+    auth: false,
+});
+
 const getPublicRooms = () => {
     // const {
     //     sockets: {
