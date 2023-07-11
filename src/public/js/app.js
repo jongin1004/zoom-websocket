@@ -49,12 +49,15 @@ const room        = document.querySelector('#room');
 chat.hidden = true;
 let roomName;
 
-const enterRoom = () => {
-    welcome.hidden = true;
-    chat.hidden    = false;
-
+const renderRoomTitle = (userCount) => {
     const roomTitle     = chat.querySelector('h3');
-    roomTitle.innerText = `Room: ${roomName}`;
+    roomTitle.innerText = `Room: ${roomName} (${userCount})`;
+}
+const enterRoom = (userCount) => {
+    welcome.hidden = true;
+    chat.hidden    = false;    
+
+    renderRoomTitle(userCount);
 
     messageForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -70,7 +73,7 @@ const enterRoom = () => {
 }
 
 roomForm.addEventListener('submit', (e) => {
-
+    
     e.preventDefault();
 
     const roomNameInput = roomForm.querySelector('input[name="roomName"]');
@@ -86,11 +89,13 @@ const insertMessage = (message) => {
     chat.querySelector('ul').insertAdjacentHTML('beforeend', HTML);
 }
 
-socket.on('welcome', (nickname) => {
+socket.on('welcome', (nickname, userCount) => {
+    renderRoomTitle(userCount);
     insertMessage(`${nickname}님이 채팅방에 참가했습니다.`);
 });
 
-socket.on('bye', (nickname) => {
+socket.on('bye', (nickname, userCount) => {
+    renderRoomTitle(userCount);
     insertMessage(`${nickname}님이 채팅방을 떠났습니다.`);
 });
 
@@ -108,4 +113,3 @@ socket.on('room_change', (rooms) => {
     const HTML = rooms.map(room => `<li>${room}</li>`);
     roomList.innerHTML = HTML;
 });
-

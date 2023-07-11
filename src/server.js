@@ -42,6 +42,11 @@ const getPublicRooms = () => {
     return publicRoom;
 }
 
+function getUserCount(roomName)
+{
+    return io.sockets.adapter.rooms.get(roomName)?.size;
+}
+
 io.on('connection', (socket) => {
         
     socket['nickname'] = 'Anonymous';
@@ -50,13 +55,13 @@ io.on('connection', (socket) => {
         
         socket.join(roomName);
         socket['nickname'] = nickname;
-        callback();
-        socket.to(roomName).emit('welcome', nickname); 
+        socket.to(roomName).emit('welcome', nickname, getUserCount(roomName)); 
         io.sockets.emit('room_change', getPublicRooms());                
+        callback(getUserCount(roomName));
     });
 
     socket.on('disconnecting', () => {
-        socket.rooms.forEach(room => socket.to(room).emit('bye', socket['nickname']));
+        socket.rooms.forEach(room => socket.to(room).emit('bye', socket['nickname'], getUserCount(room) - 1));
     });
 
     socket.on('disconnect', () => {
