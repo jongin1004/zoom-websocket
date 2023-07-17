@@ -17,13 +17,12 @@ html(lang="en")
                 div#myStream
                     //- playsinline 모바일 비디오기기 재생시 필요 (전체화면이 되지 않도록하는, 또한 핸드폰의 앱으로 비디오를 실행하지 않고, 웹 내부에서 실행되도록 )
                     video#myFace(autoplay, playsinline, width="400", height="400") 
-                    button#muteBtn Mute
-                    button#cameraBtn Turn Camera Off
-                    button#stopBtn Stop Share
-                    select#cameraSelect                        
-                        option(value="shareScreen") 화면공유
+                    button#muteBtn 음소거
+                    button#cameraBtn 카메라 끄기
+                    button#shareBtn 화면공유
+                    select#cameraSelect
                     video#peerFace(autoplay, playsinline, width="400", height="400")
                     video#shareFace(autoplay, playsinline, width="400", height="400")
 
         script(src='/socket.io/socket.io.js')
-        script(src='/public/js/app.js')
+        script(src='/public/js/app.js', type='module')
