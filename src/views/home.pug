@@ -9,12 +9,19 @@ html(lang="en")
         header
             h1 Noom
         main 
-            div#myStream
-                //- playsinline 모바일 비디오기기 재생시 필요 (전체화면이 되지 않도록하는, 또한 핸드폰의 앱으로 비디오를 실행하지 않고, 웹 내부에서 실행되도록 )
-                video#myFace(autoplay, playsinline, width="400", height="400") 
-                button#muteBtn Mute
-                button#cameraBtn Turn Camera Off
-                select#cameraSelect
+            div#welcome
+                form
+                    input(placeholder='room name', required, type='text')
+                    button Enter room
+            div#call
+                div#myStream
+                    //- playsinline 모바일 비디오기기 재생시 필요 (전체화면이 되지 않도록하는, 또한 핸드폰의 앱으로 비디오를 실행하지 않고, 웹 내부에서 실행되도록 )
+                    video#myFace(autoplay, playsinline, width="400", height="400") 
+                    button#muteBtn Mute
+                    button#cameraBtn Turn Camera Off
+                    select#cameraSelect
+                        option(value="") default
+                    video#peerFace(autoplay, playsinline, width="400", height="400") 
 
         script(src='/socket.io/socket.io.js')
         script(src='/public/js/app.js')
