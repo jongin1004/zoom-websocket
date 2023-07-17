@@ -19,9 +19,11 @@ html(lang="en")
                     video#myFace(autoplay, playsinline, width="400", height="400") 
                     button#muteBtn Mute
                     button#cameraBtn Turn Camera Off
-                    select#cameraSelect
-                        option(value="") default
-                    video#peerFace(autoplay, playsinline, width="400", height="400") 
+                    button#stopBtn Stop Share
+                    select#cameraSelect                        
+                        option(value="shareScreen") 화면공유
+                    video#peerFace(autoplay, playsinline, width="400", height="400")
+                    video#shareFace(autoplay, playsinline, width="400", height="400")
 
         script(src='/socket.io/socket.io.js')
         script(src='/public/js/app.js')
