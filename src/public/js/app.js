@@ -16,6 +16,7 @@ class App {
     constructor()
     {
         this._init();
+        this._socketEventHandler();
         // 맨 처음엔, video 관련 div는 보이지 않도록 (방입장후에 보이도록)
         view.callDiv.hidden = true;
     }
@@ -58,12 +59,21 @@ class App {
 
     async _getScreen()
     {
-        this.shareStream = await navigator.mediaDevices.getDisplayMedia({
-            video: { cursor: 'always' },
-            audio: { echoCancellation: true, noiseSuppression: true },
-        });
+        try {
+
+            this.shareStream = await navigator.mediaDevices.getDisplayMedia({
+                video: { cursor: 'always' },
+                audio: { echoCancellation: true, noiseSuppression: true },
+            });
+
+            console.log(this.shareStream);
     
-        view.shareFace.srcObject = this.shareStream;
+            view.shareFace.srcObject = this.shareStream;
+
+        } catch (e) {
+            alert('no');
+            console.error(e.message);
+        }                 
     
         // const videoTrack = myStream.getVideoTracks()[0];    
     }
@@ -105,6 +115,27 @@ class App {
         this.cameraOff = ! this.cameraOff;
         view.cameraBtn.innerHTML = this.cameraOff ? '카메라 켜기' : '카메라 끄기';      
     }
+
+    _handlerTurnShareStreamClick()
+    {                   
+        this.shared = ! this.shared;
+        view.shareBtn.innerHTML = this.shared ? '화면공유종료' : '화면공유';
+    
+        if (this.shared) {
+    
+            this._getScreen();
+        } else {        
+    
+            if ( ! this.shareStream) {
+                
+                this.shared = ! this.shared;
+                view.shareBtn.innerHTML = this.shared ? '화면공유종료' : '화면공유';
+                return;
+            };
+            const shareTracks = this.shareStream.getTracks();
+            shareTracks.forEach(track => track.stop());
+        }
+    };
     
     async _handleCameraChange(e)
     {
@@ -122,29 +153,16 @@ class App {
         }
     }
     
-    _handlerTurnShareStreamClick()
-    {    
-        this.shared = ! this.shared;
-        view.shareBtn.innerHTML = this.shared ? '화면공유종료' : '화면공유';
     
-        if (this.shared) {
-    
-            this._getScreen();
-        } else {        
-    
-            const shareTracks = this.shareStream.getTracks();
-            shareTracks.forEach(track => track.stop());
-        }
-    };
 
     async _handleWelcomeSubmit(e)
     {
         e.preventDefault();
-        // const input = welcomeForm.querySelector('input');
+        const input = view.welcomeForm.querySelector('input');
         await this._initCall();
-        // socket.emit('enter_room', input.value);
-        // roomName    = input.value;
-        // input.value = '';
+        this.socket.emit('enter_room', input.value);
+        this.roomName = input.value;
+        input.value   = '';
     }
 
     async _initCall()
@@ -153,71 +171,81 @@ class App {
         view.callDiv.hidden    = false;
 
         await this._getMedia();
-        // makeConnection();
+        this._makeConnection();
+    }
+
+    // RTC Code
+    _handleIce(data)
+    {
+        console.log('sent the iceCandidate');
+        this.socket.emit('ice', data.candidate, this.roomName);
+    }
+
+
+
+    _handleAddStream(data)
+    {
+        const peerFace     = document.querySelector('#peerFace')
+        peerFace.srcObject = data.stream;
+        console.log('got an event from my peer');
+        console.log(data);
+    }
+
+    _makeConnection()
+    {
+        this.myPeerConnection = new RTCPeerConnection({
+            iceServers: [
+                {
+                    urls: [
+                        "stun:stun.l.google.com:19302",
+                        "stun:stun1.l.google.com:19302",
+                        "stun:stun2.l.google.com:19302",
+                        "stun:stun3.l.google.com:19302",
+                        "stun:stun4.l.google.com:19302",
+                    ]
+                }
+            ]
+        });    
+
+        this.myPeerConnection.addEventListener('icecandidate', this._handleIce.bind(this));
+        this.myPeerConnection.addEventListener('addstream', this._handleAddStream.bind(this));
+        
+        this.myStream.getTracks().forEach(track => this.myPeerConnection.addTrack(track, this.myStream));    
+    }
+
+    _socketEventHandler()
+    {
+        this.socket.on('welcome',async () => {   
+            console.log('someone enter in this room');
+            const offer = await this.myPeerConnection.createOffer();
+            await this.myPeerConnection.setLocalDescription(offer);
+            console.log('sent the offer'); 
+            this.socket.emit('offer', offer, this.roomName);
+        });
+    
+        this.socket.on('offer', async (offer) => {    
+            console.log('received the offer'); 
+            this.myPeerConnection.setRemoteDescription(offer);
+            const answer = await this.myPeerConnection.createAnswer();
+            await this.myPeerConnection.setLocalDescription(answer);  
+            console.log('sent the answer'); 
+            this.socket.emit('answer', answer, this.roomName);
+        });
+    
+        this.socket.on('answer', async (answer) => {    
+            console.log('received the answer');
+            await this.myPeerConnection.setRemoteDescription(answer);
+        });
+    
+        this.socket.on('ice', (ice) => {
+            console.log('received the iceCandidate');
+            this.myPeerConnection.addIceCandidate(ice);
+        });
     }
 }
 
 new App();
 
 
-// // RTC Code
-// const handleIce = (data) => {
-//     console.log('sent the iceCandidate');
-//     socket.emit('ice', data.candidate, roomName);
-// }
 
-
-
-// const handleAddStream = (data) => {
-//     // const peerFace     = document.querySelector('#peerFace')
-//     peerFace.srcObject = data.stream;
-//     console.log('got an event from my peer');
-//     console.log(data);
-// }
-
-// const makeConnection = () => {
-//     myPeerConnection = new RTCPeerConnection({
-//         iceServers: [
-//             {
-//                 urls: [
-//                     "stun:stun.l.google.com:19302",
-//                     "stun:stun1.l.google.com:19302",
-//                     "stun:stun2.l.google.com:19302",
-//                     "stun:stun3.l.google.com:19302",
-//                     "stun:stun4.l.google.com:19302",
-//                 ]
-//             }
-//         ]
-//     });    
-//     myPeerConnection.addEventListener('icecandidate', handleIce);
-//     myPeerConnection.addEventListener('addstream', handleAddStream)
-//     myStream.getTracks().forEach(track => myPeerConnection.addTrack(track, myStream));    
-// }
-
-// socket.on('welcome',async () => {   
-//     console.log('someone enter in this room');
-//     const offer = await myPeerConnection.createOffer();
-//     await myPeerConnection.setLocalDescription(offer);
-//     console.log('sent the offer'); 
-//     socket.emit('offer', offer, roomName);
-// });
-
-// socket.on('offer', async (offer) => {    
-//     console.log('received the offer'); 
-//     myPeerConnection.setRemoteDescription(offer);
-//     const answer = await myPeerConnection.createAnswer();
-//     await myPeerConnection.setLocalDescription(answer);  
-//     console.log('sent the answer'); 
-//     socket.emit('answer', answer, roomName);
-// });
-
-// socket.on('answer', async (answer) => {    
-//     console.log('received the answer');
-//     await myPeerConnection.setRemoteDescription(answer);
-// });
-
-// socket.on('ice', (ice) => {
-//     console.log('received the iceCandidate');
-//     myPeerConnection.addIceCandidate(ice);
-// });
 

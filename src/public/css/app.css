@@ -1,0 +1,20 @@
+body {
+    background-color: darkgray;
+}
+
+video {
+    border: 1px solid rgba(0, 0, 0, .35);
+}
+
+.face_video_box {
+    /* display: flex;
+    align-items: center; */
+    /* gap: 6px; */
+}
+
+.myStream_btn_box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;    
+}

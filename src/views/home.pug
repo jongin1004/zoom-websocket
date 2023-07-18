@@ -4,25 +4,37 @@ html(lang="en")
         meta(charset="UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         title Noom
-        link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+        //- link(rel="stylesheet", href="https://unpkg.com/mvp.css")        
+        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css")
+        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css")
+        link(rel="stylesheet", href="/public/css/app.css")        
+        script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js")
+
     body 
-        header
-            h1 Noom
-        main 
-            div#welcome
-                form
-                    input(placeholder='room name', required, type='text')
-                    button Enter room
+        //- header
+        //-     h1.text-center Noom
+        main.container.mt-5
+            div#welcome.d-flex.flex-column.justify-content-center.align-items-center
+                h3 방참가
+                form.w-50.mt-5
+                    input.form-control(placeholder='room name', required, type='text')
+                    button.btn.btn-primary.mt-5 Enter room
             div#call
                 div#myStream
                     //- playsinline 모바일 비디오기기 재생시 필요 (전체화면이 되지 않도록하는, 또한 핸드폰의 앱으로 비디오를 실행하지 않고, 웹 내부에서 실행되도록 )
-                    video#myFace(autoplay, playsinline, width="400", height="400") 
-                    button#muteBtn 음소거
-                    button#cameraBtn 카메라 끄기
-                    button#shareBtn 화면공유
-                    select#cameraSelect
-                    video#peerFace(autoplay, playsinline, width="400", height="400")
-                    video#shareFace(autoplay, playsinline, width="400", height="400")
+                    div.row.gx-3
+                        div.col-6 
+                            video.p-0#myFace(autoplay, playsinline, width="100%", height="auto")
+                        div.col-6 
+                            video.p-0#peerFace(autoplay, playsinline, width="100%", height="auto")
+                    div.myStream_btn_box
+                        button.btn.btn-primary#muteBtn <i class="bi bi-mic-fill"></i> <i class="bi bi-mic-mute-fill"></i> 음소거
+                        button.btn.btn-primary#cameraBtn <i class="bi bi-camera-video-fill"></i> <i class="bi bi-camera-video-off-fill"></i> 카메라 끄기
+                        button.btn.btn-primary#shareBtn <i class="bi bi-display-fill"></i> <i class="bi bi-display"></i> 화면공유
+                    div
+                        h4 카메라선택
+                        select.form-control#cameraSelect                    
+                    //- video#shareFace(autoplay, playsinline, width="400", height="400")
 
         script(src='/socket.io/socket.io.js')
         script(src='/public/js/app.js', type='module')
